@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สูตรบริหารเงิน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0eff5;
+    --muted: #8885a0;
+    --accent: #7c6af7;
+    --accent2: #a594ff;
+    --c0: #4ade80;
+    --c1: #60a5fa;
+    --c2: #fbbf24;
+    --c3: #f472b6;
+    --c4: #a78bfa;
+    --c5: #fb923c;
+    --ok: #4ade80;
+    --err: #f87171;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 2rem 1.25rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(124,106,247,0.2) 0%, transparent 70%);
+    top: -100px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .header-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .header h1 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    position: relative;
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    position: relative;
+  }
+
+  .container { max-width: 540px; margin: 0 auto; padding: 1.25rem; }
+
+  /* Salary Card */
+  .salary-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .salary-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(124,106,247,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .salary-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .salary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .salary-sym {
+    font-size: 24px;
+    color: var(--accent2);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  #salary {
+    flex: 1;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    min-width: 0;
+  }
+  #salary::-webkit-inner-spin-button,
+  #salary::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .salary-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .salary-hint::before { content: '✏️'; font-size: 12px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .tab {
+    flex: 1;
+    min-width: 62px;
+    padding: 8px 6px;
+    font-size: 11px;
+    font-family: 'Sarabun', sans-serif;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.4;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tab:hover { border-color: var(--border2); color: var(--text); }
+  .tab.active {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .tab-name { font-weight: 600; font-size: 12px; }
+  .tab-desc { font-size: 10px; opacity: 0.7; }
+
+  /* Formula Card */
+  .formula-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .formula-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .formula-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .formula-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .badge-ok { background: rgba(74,222,128,0.15); color: var(--ok); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-err { background: rgba(248,113,113,0.15); color: var(--err); border: 1px solid rgba(248,113,113,0.3); }
+
+  /* Bar */
+  .bar-track {
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 16px;
+    gap: 1px;
+  }
+  .bar-seg { height: 8px; transition: width 0.35s cubic-bezier(0.4,0,0.2,1); }
+
+  /* Category rows */
+  .cat-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .cat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .cat-name-wrap { display: flex; align-items: center; min-width: 0; }
+  .cat-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cat-name-input {
+    font-size: 13px;
+    font-family: 'Sarabun', sans-serif;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .cat-name-input:focus { border-color: var(--accent); }
+
+  .pct-wrap { display: flex; align-items: center; gap: 3px; }
+  .pct-input {
+    width: 52px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 6px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .pct-input:focus { border-color: var(--accent); }
+  .pct-input::-webkit-inner-spin-button, .pct-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .pct-sym { font-size: 13px; color: var(--muted); }
+
+  .amt-wrap { display: flex; align-items: center; gap: 3px; }
+  .amt-sym { font-size: 13px; color: var(--muted); }
+  .amt-input {
+    width: 80px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 6px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .amt-input:focus { border-color: var(--accent); }
+  .amt-input::-webkit-inner-spin-button, .amt-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  /* Total */
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 13px; color: var(--muted); }
+  .total-amount {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
+    color: var(--text);
+  }
+
+  /* Add/Remove buttons */
+  .cat-row-custom {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .btn-remove {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(248,113,113,0.3);
+    background: rgba(248,113,113,0.1);
+    color: var(--err);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .btn-remove:hover { background: rgba(248,113,113,0.25); border-color: rgba(248,113,113,0.5); }
+  .btn-remove:disabled { opacity: 0.25; cursor: not-allowed; }
+  .btn-add {
+    width: 100%;
+    margin-top: 4px;
+    padding: 9px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed rgba(124,106,247,0.4);
+    background: rgba(124,106,247,0.06);
+    color: var(--accent2);
+    font-size: 13px;
+    font-family: 'Sarabun', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-add:hover { background: rgba(124,106,247,0.14); border-color: rgba(124,106,247,0.7); }
+
+  /* Tip */
+  .tip {
+    margin-top: 1rem;
+    padding: 10px 12px;
+    background: rgba(124,106,247,0.08);
+    border: 1px solid rgba(124,106,247,0.2);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .tip b { color: var(--accent2); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem 1rem 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Slider for pct on mobile */
+  @media (max-width: 400px) {
+    .cat-row { grid-template-columns: 1fr auto auto; gap: 6px; }
+    .pct-input { width: 46px; font-size: 13px; }
+    .amount { min-width: 76px; font-size: 13px; }
+    #salary { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-icon">💰</span>
+  <h1>สูตรบริหารเงิน</h1>
+  <p>ปรับเงินเดือนและเปอร์เซ็นต์ได้ตามใจ</p>
+</div>
+
+<div class="container">
+
+  <div class="salary-card">
+    <div class="salary-label">เงินเดือน</div>
+    <div class="salary-row">
+      <span class="salary-sym">฿</span>
+      <input id="salary" type="number" value="14000" min="0" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="salary-hint">กรอกจำนวนเงินเดือนของคุณ</div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="formula-area"></div>
+
+  <div class="tip">
+    <b>วิธีใช้:</b> กรอกเงินเดือน → เลือกสูตร → ปรับ <b>%</b> หรือ <b>฿</b> ได้เลย ทั้งสองช่องสัมพันธ์กัน
+    <br>สูตร <b>Custom</b> เปลี่ยนชื่อหมวด เพิ่ม หรือลบหมวดได้ตามต้องการ
+  </div>
+
+  <div class="footer">สร้างด้วย ❤️ — เปิดได้ทุกอุปกรณ์ ไม่ต้องติดตั้ง</div>
+</div>
+
+<script>
+const PRESETS = [
+  { name:"50-30-20", desc:"ไม่มีหนี้", cats:[
+    {name:"จำเป็น", pct:50},
+    {name:"ตามใจ",  pct:30},
+    {name:"ลงทุน",  pct:20}
+  ]},
+  { name:"40-30-20-10", desc:"มีหนี้", cats:[
+    {name:"จำเป็น",   pct:40},
+    {name:"ชำระหนี้", pct:30},
+    {name:"ลงทุน",   pct:20},
+    {name:"ตามใจ",   pct:10}
+  ]},
+  { name:"60-20-20", desc:"รายจ่ายสูง", cats:[
+    {name:"จำเป็น", pct:60},
+    {name:"ลงทุน",  pct:20},
+    {name:"ตามใจ",  pct:20}
+  ]},
+  { name:"55-20-25", desc:"เน้นลงทุน", cats:[
+    {name:"จำเป็น", pct:55},
+    {name:"ลงทุน",  pct:25},
+    {name:"ตามใจ",  pct:20}
+  ]},
+  { name:"Custom", desc:"กำหนดเอง", cats:[
+    {name:"หมวด 1", pct:40},
+    {name:"หมวด 2", pct:30},
+    {name:"หมวด 3", pct:20},
+    {name:"หมวด 4", pct:10}
+  ]}
+];
+
+const COLORS = ["#4ade80","#60a5fa","#fbbf24","#f472b6","#a78bfa","#fb923c"];
+
+let active = 0;
+let data = PRESETS.map(p => ({ ...p, cats: p.cats.map(c => ({ ...c })) }));
+
+function salary() { return parseFloat(document.getElementById('salary').value) || 0; }
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+function totalPct(cats) { return cats.reduce((s, c) => s + (parseFloat(c.pct) || 0), 0); }
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = data.map((p, i) =>
+    `<div class="tab${i === active ? ' active' : ''}" onclick="setActive(${i})">
+      <div class="tab-name">${p.name}</div>
+      <div class="tab-desc">${p.desc}</div>
+    </div>`
+  ).join('');
+}
+
+function renderFormula() {
+  const p = data[active];
+  const s = salary();
+  const tot = Math.round(totalPct(p.cats) * 10) / 10;
+  const ok = tot === 100;
+  const isCustom = active === data.length - 1;
+
+  // bar
+  const barSegs = p.cats.map((c, i) =>
+    `<div class="bar-seg" style="width:${Math.max(0, c.pct)}%;background:${COLORS[i % COLORS.length]}"></div>`
+  ).join('');
+
+  // rows
+  const rows = p.cats.map((c, i) => {
+    const clr = COLORS[i % COLORS.length];
+    const amt = s > 0 ? Math.round(s * (parseFloat(c.pct) || 0) / 100) : 0;
+
+    const pctCell = `<div class="pct-wrap">
+      <input class="pct-input" type="number" min="0" max="100" step="0.1" value="${parseFloat(c.pct)||0}" oninput="setPct(${i},this.value)" inputmode="decimal">
+      <span class="pct-sym">%</span>
+    </div>`;
+    const amtCell = `<div class="amt-wrap">
+      <span class="amt-sym">฿</span>
+      <input class="amt-input" type="number" min="0" step="1" value="${amt}" oninput="setAmt(${i},this.value)" inputmode="numeric">
+    </div>`;
+
+    if (isCustom) {
+      const canRemove = p.cats.length > 1;
+      return `<div class="cat-row-custom">
+        <div class="cat-name-wrap"><span class="cat-dot" style="background:${clr}"></span><input class="cat-name-input" value="${c.name}" oninput="setName(${i},this.value)"></div>
+        ${pctCell}${amtCell}
+        <button class="btn-remove" onclick="removeCat(${i})" ${canRemove ? '' : 'disabled'} title="ลบหมวดนี้">−</button>
+      </div>`;
+    }
+    return `<div class="cat-row">
+      <div class="cat-name-wrap"><span class="cat-dot" style="background:${clr}"></span><span class="cat-name">${c.name}</span></div>
+      ${pctCell}${amtCell}
+    </div>`;
+  }).join('');
+
+  const addBtn = isCustom
+    ? `<button class="btn-add" onclick="addCat()">+ เพิ่มหมวด</button>`
+    : '';
+
+  document.getElementById('formula-area').innerHTML = `
+<div class="formula-card">
+  <div class="formula-top">
+    <div>
+      <div class="formula-title">${p.name}</div>
+      <div class="formula-desc">${p.desc}</div>
+    </div>
+    <span class="badge ${ok ? 'badge-ok' : 'badge-err'}">${ok ? '✓ 100%' : '⚠ ' + tot + '%'}</span>
+  </div>
+  <div class="bar-track">${barSegs}</div>
+  ${rows}
+  ${addBtn}
+  <div class="divider"></div>
+  <div class="total-row">
+    <span class="total-label">รวมทั้งหมด</span>
+    <span class="total-amount">฿${fmt(s)}</span>
+  </div>
+</div>`;
+}
+
+function render() { renderTabs(); renderFormula(); }
+function setActive(i) { active = i; render(); }
+function setPct(i, v) {
+  let n = parseFloat(v);
+  if (isNaN(n)) n = 0;
+  if (n < 0) n = 0; if (n > 100) n = 100;
+  data[active].cats[i].pct = n;
+  renderFormula();
+}
+function setAmt(i, v) {
+  const s = salary();
+  if (s <= 0) return;
+  let a = parseFloat(v);
+  if (isNaN(a)) a = 0;
+  if (a < 0) a = 0;
+  let pct = (a / s) * 100;
+  pct = Math.round(pct * 10) / 10;
+  if (pct > 100) pct = 100;
+  data[active].cats[i].pct = pct;
+  renderFormula();
+}
+function setName(i, v) { data[active].cats[i].name = v; renderTabs(); }
+
+function addCat() {
+  const cats = data[active].cats;
+  const n = cats.length + 1;
+  cats.push({ name: 'หมวด ' + n, pct: 0 });
+  renderFormula();
+}
+function removeCat(i) {
+  const cats = data[active].cats;
+  if (cats.length <= 1) return;
+  cats.splice(i, 1);
+  renderFormula();
+}
+
+document.getElementById('salary').addEventListener('input', renderFormula);
+render();
+</script>
+</body>
+</html>
